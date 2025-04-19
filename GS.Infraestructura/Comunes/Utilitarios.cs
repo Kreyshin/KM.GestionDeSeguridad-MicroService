@@ -35,7 +35,35 @@ namespace GS.Infraestructura.Comunes
                 }
                 else
                 {
-                    dynamicParameters.Add($"@{item.Key}", value: item.Value.ToString());
+                    var keyParam = item.Key;
+                    var token = item.Value;
+
+                    if (keyParam.StartsWith("IID"))
+                    {
+
+                        if (token.Type != JTokenType.Null)
+                        {
+                            var valor = token.Type == JTokenType.Null ? (object)DBNull.Value : token.Value<int>();
+                            dynamicParameters.Add($"@{keyParam}", value: valor, DbType.Int32, ParameterDirection.Input);
+                        }
+                    }
+                    else if (keyParam.StartsWith("IB"))
+                    {
+                        if (token.Type != JTokenType.Null)
+                        {
+                            var valor = token.Type == JTokenType.Null ? (object)DBNull.Value : token.Value<bool?>();
+                            dynamicParameters.Add($"@{keyParam}", value: valor, DbType.Boolean, ParameterDirection.Input);
+                        }
+                    }
+                    else if (keyParam.StartsWith("IC"))
+                    {
+                        if (token.Type != JTokenType.Null)
+                        {
+                            var valor = token.Type == JTokenType.Null ? (object)DBNull.Value : token.Value<string>();
+                            dynamicParameters.Add($"@{keyParam}", value: valor, DbType.String, ParameterDirection.Input);
+                        }
+                       
+                    }
                 }
             }
 

@@ -15,17 +15,17 @@ using System.Threading.Tasks;
 
 namespace GS.Infraestructura.Repositorios.Querys
 {
-    public class RolRespositoryQ(DbConexion dbConexion, ILogger<RolRespositoryQ> logger) : IRolRepositoryQ
+    public class RolRepositoryQ(DbConexion dbConexion, ILogger<RolRepositoryQ> logger) : IRolRepositoryQ
     {
         private readonly DbConexion _dbConexion = dbConexion;
-        private readonly ILogger<RolRespositoryQ> _logger = logger;
+        private readonly ILogger<RolRepositoryQ> _logger = logger;
 
         public async Task<SingleResponse<RolEN>> BuscarPorID(int id)
         {
             SingleResponse<RolEN> oResp = new();
             DynamicParameters parametros = Utilitarios.GenerarParametros(new
             {
-                IID_Rol = id,
+                IID = id,
             });
 
             try
@@ -39,13 +39,19 @@ namespace GS.Infraestructura.Repositorios.Querys
             }
             catch (SqlException exsql)
             {
-                oResp.StatusCode = exsql.Number;
-                oResp.StatusMessage = exsql.Message;
+                _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar eliminar el ROl con ID: {id}", id);
+                oResp.ErrorCode = exsql.Number;
+                oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
+                oResp.StatusType = "SQL-ERROR";
+                return oResp;
             }
             catch (Exception ex)
             {
-                oResp.StatusCode = 959899;
-                oResp.StatusMessage = ex.Message;
+                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar crear el rol.");
+                oResp.ErrorCode = 50100;
+                oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
+                oResp.StatusType = "BACKEND-ERROR";
+                return oResp;
             }
 
             return oResp;
@@ -56,9 +62,8 @@ namespace GS.Infraestructura.Repositorios.Querys
             ListResponse<RolEN> oResp = new();
             DynamicParameters parametros = Utilitarios.GenerarParametros(new
             {
-                IC_Estado = oFiltro.C_Estado,
                 IC_Nombre = oFiltro.C_Nombre,
-
+                IC_Estado = oFiltro.C_Estado,               
             });
 
             try
@@ -72,13 +77,17 @@ namespace GS.Infraestructura.Repositorios.Querys
             }
             catch (SqlException exsql)
             {
-                oResp.StatusCode = exsql.Number;
-                oResp.StatusMessage = exsql.Message;
+                _logger.LogError(exsql, "SQL Error ({ErrorCode}): Ocurrió una excepción SQL al autenticar usuario.", exsql.Number);
+                oResp.ErrorCode = exsql.Number;
+                oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
+                oResp.StatusType = "SQL-ERROR";
             }
-            catch (Exception exc)
+            catch (Exception ex)
             {
-                oResp.StatusCode = 959899;
-                oResp.StatusMessage = exc.Message;
+                _logger.LogError(ex, "Backend Error (50100): Ocurrió una excepción en C# al autenticar usuario.");
+                oResp.ErrorCode = 50100;
+                oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
+                oResp.StatusType = "BACKEND-ERROR";
             }
 
             return oResp;
