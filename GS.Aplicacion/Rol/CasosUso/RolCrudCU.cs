@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using GS.Aplicacion.Comunes.AuditoriaHelper;
 using GS.Aplicacion.Rol.Dtos.Request;
 using GS.Aplicacion.Rol.Dtos.Response;
 using GS.Aplicacion.Rol.Interfaces;
@@ -6,20 +7,22 @@ using GS.Dominio.Comunes;
 using GS.Dominio.Entidades;
 using GS.Dominio.Interfaces.Commands;
 using GS.Dominio.Interfaces.Querys;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace GS.Aplicacion.Rol.CasosUso
 {
-    public class RolCrudCU(IRolRepositoryQ rolRepositoryQ, IRolRepositoryC rolRepositoryC, IMapper mapper) : IRolCrudCU
+    public class RolCrudCU(
+        IRolRepositoryQ rolRepositoryQ, 
+        IRolRepositoryC rolRepositoryC, 
+        IMapper mapper, ILogger<RolCrudCU> logger,
+        IAuditoriaHelp audiHelp) : IRolCrudCU
     {
 
         private readonly IRolRepositoryQ _rolRepoQ = rolRepositoryQ;
         private readonly IRolRepositoryC _rolRepoC = rolRepositoryC;
         private readonly IMapper _mapper = mapper;
+        private readonly ILogger<RolCrudCU> _logger = logger;
+        private readonly IAuditoriaHelp _audiHelp = audiHelp;
 
         public async Task<SingleResponse<RolActualizarRE>> Actualizar(int id, RolActualizarRQ oRegistro)
         {
@@ -32,6 +35,7 @@ namespace GS.Aplicacion.Rol.CasosUso
             {
                 var rolEn = _mapper.Map<RolEN>(oRegistro);
                 rolEn.ID_Rol = id;
+
 
                 var oRes = await _rolRepoC.Actualizar(rolEn);
                 var oResp = new SingleResponse<RolActualizarRE>
@@ -58,9 +62,59 @@ namespace GS.Aplicacion.Rol.CasosUso
             throw new NotImplementedException();
         }
 
-        public Task<ListResponse<RolConsultarRE>> Consultar(RolConsultarRQ oFiltro)
+        public async Task<ListResponse<RolConsultarRE>> Consultar(RolConsultarRQ oFiltro)
         {
-            throw new NotImplementedException();
+           if(oFiltro == null)
+           {
+               throw new ArgumentNullException(nameof(oFiltro));
+           }
+
+            try
+            {
+                var rolEN = _mapper.Map<RolEN>(oFiltro);
+
+                var oRes = await _rolRepoQ.Consultar(rolEN);
+
+                if(oRes.ErrorCode == 0 && oRes.Data.Count() > 0)
+                {
+                    return new ListResponse<RolConsultarRE>
+                    {
+                        StatusCode = 200,
+                        Data = _mapper.Map<List<RolConsultarRE>>(oRes.Data),
+                        StatusType = "ÉXITO"
+                    };
+                }
+                else if (oRes.ErrorCode == 0 && oRes.Data.Count() > 0)
+                {
+                    return new ListResponse<RolConsultarRE>
+                    {
+                        StatusCode = 204,
+                        Data = null,
+                        StatusMessage = oRes.StatusMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+                else
+                {
+                    return new ListResponse<RolConsultarRE>
+                    {
+                        StatusCode = 500,
+                        Data = null,
+                        StatusMessage = oRes.ErrorMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{50200}: Ocurrio un exepcion(c#) al intentar consultar los roles.");
+                return new ListResponse<RolConsultarRE>
+                {
+                    StatusCode = 500,
+                    StatusType = "BACKEND-ERROR",
+                    StatusMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio."
+                };
+            }
         }
 
         public async Task<SingleResponse<RolCrearRE>> Crear(RolCrearRQ oRegistro)
@@ -73,25 +127,48 @@ namespace GS.Aplicacion.Rol.CasosUso
             try
             {
                 var rolEn = _mapper.Map<RolEN>(oRegistro);
-
+                rolEn.C_Usuario_Creacion = _audiHelp.UserName;
 
                 var oRes = await _rolRepoC.Crear(rolEn);
-                var oResp = new SingleResponse<RolCrearRE>
-                {
-                    StatusCode = oRes.StatusCode,
-                    //type = oRes.Result.code == 0 ? "Correcto" : "Excepcion(Sql)",
-                    Data = oRes.StatusCode == 0 ? _mapper.Map<RolCrearRE>(oRes.Data) : null
-                };
 
-                return oResp;
+                if(oRes.ErrorCode == 0)
+                {   
+                    return new SingleResponse<RolCrearRE>
+                    {
+                        StatusCode = 200,
+                        Data = _mapper.Map<RolCrearRE>(oRes.Data),
+                        StatusType = "ÉXITO"
+                    };
+                }
+                else if (oRes.ErrorCode == 50001)
+                {
+                    return new SingleResponse<RolCrearRE>
+                    {
+                        StatusCode = 204,
+                        Data =  null,
+                        StatusMessage = oRes.StatusMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+                else
+                {
+                    return new SingleResponse<RolCrearRE>
+                    {
+                        StatusCode = 500,
+                        Data = null,
+                        StatusMessage = oRes.ErrorMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"{50200}: Ocurrio un exepcion(c#) al intentar crear el rol.");
                 return new SingleResponse<RolCrearRE>
                 {
-                    StatusCode = -1,
-                    //type = "Excepcion(c#)",
-                    StatusMessage = ex.Message
+                    StatusCode = 500,
+                    StatusType = "BACKEND-ERROR",
+                    StatusMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio."
                 };
             }
         }

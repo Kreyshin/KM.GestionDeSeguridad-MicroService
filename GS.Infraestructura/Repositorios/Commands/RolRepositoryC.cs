@@ -6,12 +6,7 @@ using GS.Infraestructura.Comunes;
 using GS.Infraestructura.Persistencia;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GS.Infraestructura.Repositorios.Commands
 {
@@ -34,7 +29,7 @@ namespace GS.Infraestructura.Repositorios.Commands
             {
                 IID_Rol = rol.ID_Rol,
                 IC_Nombre = rol.C_Nombre,
-                IB_Estado = rol.B_Activo,
+                IB_Activo = rol.B_Activo,
                 IC_Usuario_Modifiacion = rol.C_Usuario_Modificacion
             });
 
@@ -49,15 +44,24 @@ namespace GS.Infraestructura.Repositorios.Commands
             }
             catch (SqlException exsql)
             {
-                _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar actualizar el ROl con ID: {ID_Rol}", rol.ID_Rol);
-                oResp.StatusCode = exsql.Number;
-                oResp.StatusMessage = "Error  de base de datos, comunicarse con el Administrador de Base de datos.";
+                if (exsql.Number != 50001)
+                {
+                    _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar actualizar el ROl con ID: {id}", rol.ID_Rol);
+                    oResp.ErrorCode = exsql.Number;
+                    oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
+                    oResp.StatusType = "SQL-ERROR";
+                    return oResp;
+                }
+
+                oResp.StatusMessage = exsql.Message;
             }
             catch (Exception ex)
-            {
+            {              
                 _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar actualizar el ROl con ID: {ID_Rol}", rol.ID_Rol);
-                oResp.StatusCode = 959899;
-                oResp.StatusMessage = "Error de BackEnd, comunicarse con el encargado de esta Api.";
+                oResp.ErrorCode = 50100;
+                oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
+                oResp.StatusType = "BACKEND-ERROR";
+                return oResp;
             }
 
             return oResp;
@@ -89,24 +93,29 @@ namespace GS.Infraestructura.Repositorios.Commands
             }
             catch (SqlException exsql)
             {
-                if (exsql.Number != 50001)
+                if (exsql.Number == 50001)
                 {
-                    _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar crear el rol.");
+                    // Es un mensaje de validación del SP, no un error crítico
+                    _logger.LogWarning("Validación de negocio: {Mensaje}", exsql.Message);
+                    oResp.ErrorCode = 50001;
+                    oResp.StatusMessage = exsql.Message;
+                    oResp.StatusType = "VALIDACION";
+                }
+                else
+                {
+                    // Es un error real de SQL
+                    _logger.LogError(exsql, "SQL Error ({ErrorCode}): Ocurrió una excepción SQL al autenticar usuario.", exsql.Number);
                     oResp.ErrorCode = exsql.Number;
                     oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
                     oResp.StatusType = "SQL-ERROR";
-                    return oResp;
                 }
-
-                oResp.StatusMessage = exsql.Message;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar crear el rol.");
+                _logger.LogError(ex, "Backend Error (50100): Ocurrió una excepción en C# al autenticar usuario.");
                 oResp.ErrorCode = 50100;
                 oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
                 oResp.StatusType = "BACKEND-ERROR";
-                return oResp;
             }
 
             return oResp;
@@ -130,15 +139,24 @@ namespace GS.Infraestructura.Repositorios.Commands
             }
             catch (SqlException exsql)
             {
-                _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar eliminar el ROl con ID: {id}", id);
-                oResp.StatusCode = exsql.Number;
-                oResp.StatusMessage = "Error  de base de datos, comunicarse con el Administrador de Base de datos.";
+                if (exsql.Number != 50001)
+                {
+                    _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar eliminar el ROl con ID: {id}", id);
+                    oResp.ErrorCode = exsql.Number;
+                    oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
+                    oResp.StatusType = "SQL-ERROR";
+                    return oResp;
+                }
+
+                oResp.StatusMessage = exsql.Message;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar eliminar el ROl con ID: {id}", id);
-                oResp.StatusCode = 959899;
-                oResp.StatusMessage = "Error de BackEnd, comunicarse con el encargado de esta Api.";
+                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar crear el rol.");
+                oResp.ErrorCode = 50100;
+                oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
+                oResp.StatusType = "BACKEND-ERROR";
+                return oResp;
             }
 
             return oResp;

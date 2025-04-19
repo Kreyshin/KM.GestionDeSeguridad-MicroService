@@ -9,6 +9,6 @@ namespace GS.Aplicacion.Rol.Dtos.Request
     public class RolActualizarRQ
     {
         public string? nombre { get; set; }
-        public bool? estado { set; get; }
+        public bool? activo { set; get; }
     }
 }
