@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\GS.Aplicacion\GS.Aplicacion.csproj" />
     <ProjectReference Include="..\GS.Infraestructura\GS.Infraestructura.csproj" />
+    <ProjectReference Include="..\GS.Logging\GS.Logging.csproj" />
   </ItemGroup>
 
 </Project>
