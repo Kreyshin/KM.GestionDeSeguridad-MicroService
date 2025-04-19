@@ -4,11 +4,15 @@ using GS.Aplicacion.Configuracion;
 using GS.Infraestructura.Configuracion;
 using GS.Infraestructura.Persistencia;
 using GS.Logging;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 // Add services to the container.
 
 builder.Services.AddControllers();

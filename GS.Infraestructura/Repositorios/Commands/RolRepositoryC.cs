@@ -27,10 +27,10 @@ namespace GS.Infraestructura.Repositorios.Commands
 
             DynamicParameters objParam = Utilitarios.GenerarParametros(new
             {
-                IID_Rol = rol.ID_Rol,
+                IID = rol.ID,
                 IC_Nombre = rol.C_Nombre,
                 IB_Activo = rol.B_Activo,
-                IC_Usuario_Modifiacion = rol.C_Usuario_Modificacion
+                IC_Usuario_Modificacion = rol.C_Usuario_Modificacion
             });
 
             try
@@ -46,7 +46,7 @@ namespace GS.Infraestructura.Repositorios.Commands
             {
                 if (exsql.Number != 50001)
                 {
-                    _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar actualizar el ROl con ID: {id}", rol.ID_Rol);
+                    _logger.LogError(exsql, "Ocurrio un exepcion(Sql) al intentar actualizar el ROl con ID: {id}", rol.ID);
                     oResp.ErrorCode = exsql.Number;
                     oResp.ErrorMessage = "Error de base de datos, contactar con el administrador del sistema.";
                     oResp.StatusType = "SQL-ERROR";
@@ -57,7 +57,7 @@ namespace GS.Infraestructura.Repositorios.Commands
             }
             catch (Exception ex)
             {              
-                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar actualizar el ROl con ID: {ID_Rol}", rol.ID_Rol);
+                _logger.LogError(ex, "Ocurrio un exepcion(c#) al intentar actualizar el ROl con ID: {ID_Rol}", rol.ID);
                 oResp.ErrorCode = 50100;
                 oResp.ErrorMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio.";
                 oResp.StatusType = "BACKEND-ERROR";
@@ -126,7 +126,7 @@ namespace GS.Infraestructura.Repositorios.Commands
             var oResp = new SingleResponse<int>();
             DynamicParameters objParam = Utilitarios.GenerarParametros(new
             {
-                IID_Rol = id
+                IID = id
             });
             try
             {

@@ -33,33 +33,99 @@ namespace GS.Aplicacion.Rol.CasosUso
 
             try
             {
-                var rolEn = _mapper.Map<RolEN>(oRegistro);
-                rolEn.ID_Rol = id;
+                var RolEn = _mapper.Map<RolEN>(oRegistro);
+                RolEn.ID = id;
+                RolEn.C_Usuario_Modificacion = _audiHelp.UserName;
+                var oRes = await _rolRepoC.Actualizar(RolEn);
 
-
-                var oRes = await _rolRepoC.Actualizar(rolEn);
-                var oResp = new SingleResponse<RolActualizarRE>
+                if (oRes.ErrorCode == 0)
                 {
-                    StatusCode = oRes.StatusCode,
-                    Data = oRes.StatusCode == 0 ? _mapper.Map<RolActualizarRE>(oRes.Data) : null
-                };
-
-                return oResp;
+                    return new SingleResponse<RolActualizarRE>
+                    {
+                        StatusCode = 200,
+                        Data = _mapper.Map<RolActualizarRE>(oRes.Data),
+                        StatusType = "ÉXITO"
+                    };
+                }
+                else if (oRes.ErrorCode == 50001)
+                {
+                    return new SingleResponse<RolActualizarRE>
+                    {
+                        StatusCode = 400,
+                        Data = null,
+                        StatusMessage = oRes.StatusMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+                else
+                {
+                    return new SingleResponse<RolActualizarRE>
+                    {
+                        StatusCode = 500,
+                        Data = null,
+                        StatusMessage = oRes.ErrorMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"{50200}: Ocurrio un exepcion(c#) al intentar actualizar la Rol.");
                 return new SingleResponse<RolActualizarRE>
                 {
-                    StatusCode = -1,
-                    //type = "Excepcion(c#)",
-                    StatusMessage = ex.Message
+                    StatusCode = 500,
+                    StatusType = "BACKEND-ERROR",
+                    StatusMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio."
                 };
             }
         }
 
-        public Task<SingleResponse<RolBuscarPorIDRE>> BuscarPorID(int id)
+        public async Task<SingleResponse<RolBuscarPorIDRE>> BuscarPorID(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var oRes = await _rolRepoQ.BuscarPorID(id);
+
+                if (oRes.ErrorCode == 0 && oRes.Data != null)
+                {
+                    return new SingleResponse<RolBuscarPorIDRE>
+                    {
+                        StatusCode = 200,
+                        Data = _mapper.Map<RolBuscarPorIDRE>(oRes.Data),
+                        StatusType = "ÉXITO"
+                    };
+                }
+                else if (oRes.ErrorCode == 0 && oRes.Data == null)
+                {
+                    return new SingleResponse<RolBuscarPorIDRE>
+                    {
+                        StatusCode = 204,
+                        Data = null,
+                        StatusMessage = oRes.StatusMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+                else
+                {
+                    return new SingleResponse<RolBuscarPorIDRE>
+                    {
+                        StatusCode = 500,
+                        Data = null,
+                        StatusMessage = oRes.ErrorMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{50200}: Ocurrio un exepcion(c#) al intentar buscar Rol por ID.");
+                return new SingleResponse<RolBuscarPorIDRE>
+                {
+                    StatusCode = 500,
+                    StatusType = "BACKEND-ERROR",
+                    StatusMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio."
+                };
+            }
         }
 
         public async Task<ListResponse<RolConsultarRE>> Consultar(RolConsultarRQ oFiltro)
@@ -84,12 +150,12 @@ namespace GS.Aplicacion.Rol.CasosUso
                         StatusType = "ÉXITO"
                     };
                 }
-                else if (oRes.ErrorCode == 0 && oRes.Data.Count() > 0)
+                else if (oRes.ErrorCode == 0 && oRes.Data.Count() == 0)
                 {
                     return new ListResponse<RolConsultarRE>
                     {
                         StatusCode = 204,
-                        Data = null,
+                        Data = [],
                         StatusMessage = oRes.StatusMessage,
                         StatusType = oRes.StatusType
                     };
@@ -99,7 +165,7 @@ namespace GS.Aplicacion.Rol.CasosUso
                     return new ListResponse<RolConsultarRE>
                     {
                         StatusCode = 500,
-                        Data = null,
+                        Data = [],
                         StatusMessage = oRes.ErrorMessage,
                         StatusType = oRes.StatusType
                     };
@@ -173,9 +239,53 @@ namespace GS.Aplicacion.Rol.CasosUso
             }
         }
 
-        public Task<SingleResponse<bool>> Eliminar(int id)
+        public async Task<SingleResponse<bool>> Eliminar(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var oRes = await _rolRepoC.Eliminar(id);
+
+                if (oRes.ErrorCode == 0)
+                {
+                    return new SingleResponse<bool>
+                    {
+                        StatusCode = 200,
+                        Data = true,
+                        StatusType = "ÉXITO"
+                    };
+                }
+                else if (oRes.ErrorCode == 50001)
+                {
+                    return new SingleResponse<bool>
+                    {
+                        StatusCode = 400,
+                        Data = false,
+                        StatusMessage = oRes.StatusMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+                else
+                {
+                    return new SingleResponse<bool>
+                    {
+                        StatusCode = 500,
+                        Data = false,
+                        StatusMessage = oRes.ErrorMessage,
+                        StatusType = oRes.StatusType
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{50200}: Ocurrio un exepcion(c#) al intentar eliminar la Rol.");
+                return new SingleResponse<bool>
+                {
+                    StatusCode = 500,
+                    StatusType = "BACKEND-ERROR",
+                    StatusMessage = "Error de BackEnd, comunicarse con el encargado de este microservicio."
+                };
+            }
         }
     }
+
 }

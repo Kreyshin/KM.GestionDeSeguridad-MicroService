@@ -25,7 +25,7 @@ namespace GS.Infraestructura.Repositorios.Querys
             SingleResponse<RolEN> oResp = new();
             DynamicParameters parametros = Utilitarios.GenerarParametros(new
             {
-                IID_Rol = id,
+                IID = id,
             });
 
             try

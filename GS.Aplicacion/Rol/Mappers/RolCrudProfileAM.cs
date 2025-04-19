@@ -21,16 +21,17 @@ namespace GS.Aplicacion.Rol.Mappers
              .ForMember(dest => dest.C_Nombre, opt => opt.MapFrom(src => src.nombre));
 
             CreateMap<RolEN, RolCrearRE>()
-             .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID_Rol))
+             .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID))
              .ForMember(dest => dest.nombre, opt => opt.MapFrom(src => src.C_Nombre))
              .ForMember(dest => dest.activo, opt => opt.MapFrom(src => src.B_Activo))
              .ForMember(dest => dest.estado, opt => opt.MapFrom(src => src.C_Estado));
 
 
             CreateMap<RolEN , RolActualizarRE>()
-              .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID_Rol))
+              .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID))
               .ForMember(dest => dest.nombre, opt => opt.MapFrom(src => src.C_Nombre))
-              .ForMember(dest => dest.activo, opt => opt.MapFrom(src => src.B_Activo));
+              .ForMember(dest => dest.activo, opt => opt.MapFrom(src => src.B_Activo))
+              .ForMember(dest => dest.estado, opt => opt.MapFrom(src => src.C_Estado));
 
 
 
@@ -39,14 +40,14 @@ namespace GS.Aplicacion.Rol.Mappers
                .ForMember(dest => dest.C_Estado, opt => opt.MapFrom(src => src.estado));
 
             CreateMap<RolEN, RolBuscarPorIDRE>()
-                .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID_Rol))
+                .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.nombre, opt => opt.MapFrom(src => src.C_Nombre))
                 .ForMember(dest => dest.activo, opt => opt.MapFrom(src => src.B_Activo))
                 .ForMember(dest => dest.estado, opt => opt.MapFrom(src => src.C_Estado))
                 .ReverseMap();
 
             CreateMap<RolEN, RolConsultarRE>()
-               .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID_Rol))
+               .ForMember(dest => dest.id, opt => opt.MapFrom(src => src.ID))
                .ForMember(dest => dest.nombre, opt => opt.MapFrom(src => src.C_Nombre))
                .ForMember(dest => dest.activo, opt => opt.MapFrom(src => src.B_Activo))
                .ForMember(dest => dest.estado, opt => opt.MapFrom(src => src.C_Estado))

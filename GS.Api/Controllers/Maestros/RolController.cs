@@ -29,9 +29,8 @@ namespace GS.Api.Controllers.Maestros
 
             return oResult.StatusCode switch
             {
-                0 => Ok(oResult.Data),
+                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage }),
                 204 => NoContent(),
-                -1 => StatusCode(500, new { oResult.StatusMessage }),
                 _ => StatusCode(500, new { oResult.StatusMessage })
             };
         }
@@ -43,9 +42,8 @@ namespace GS.Api.Controllers.Maestros
 
             return oResult.StatusCode switch
             {
-                0 => Ok(oResult.Data),
+                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage }),
                 204 => NoContent(),
-                -1 => StatusCode(500, new { oResult.StatusMessage }),
                 _ => StatusCode(500, new { oResult.StatusMessage })
             };
         }
@@ -59,15 +57,15 @@ namespace GS.Api.Controllers.Maestros
         {
             if (oRegistro == null)
             {
-                return BadRequest(new { type = "InvalidInput", message = "El registro no puede ser nulo." });
+                return BadRequest(new { StatusType = "InvalidInput", StatusMessage = "El registro no puede ser nulo." });
             }
 
             var oResult = await _rolCrudCU.Crear(oRegistro);
 
             return oResult.StatusCode switch
             {
-                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage } ),
-                204 => Ok(new { oResult.StatusType,  oResult.StatusMessage}),
+                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage }),
+                400 => BadRequest(new { oResult.StatusType, oResult.StatusMessage }),
                 _ => StatusCode(500, new { oResult.StatusType, oResult.StatusMessage })
             };
         }
@@ -77,15 +75,15 @@ namespace GS.Api.Controllers.Maestros
         {
             if (oRegistro == null)
             {
-                return BadRequest(new { type = "InvalidInput", message = "El registro no puede ser nulo." });
+                return BadRequest(new { StatusType = "InvalidInput", StatusMessage = "El registro no puede ser nulo." });
             }
 
             var oResult = await _rolCrudCU.Actualizar(id, oRegistro);
 
             return oResult.StatusCode switch
             {
-                0 => Ok(oResult.Data),
-                -1 => StatusCode(500, new { oResult.StatusMessage }),
+                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage }),
+                400 => BadRequest(new { oResult.StatusType, oResult.StatusMessage }),
                 _ => StatusCode(500, new { oResult.StatusMessage })
             };
         }
@@ -99,8 +97,8 @@ namespace GS.Api.Controllers.Maestros
 
             return oResult.StatusCode switch
             {
-                0 => Ok(oResult.Data),
-                -1 => StatusCode(500, new { oResult.StatusMessage }),
+                200 => Ok(new { oResult.Data, oResult.StatusType, oResult.StatusMessage }),
+                400 => BadRequest(new { oResult.StatusType, oResult.StatusMessage }),
                 _ => StatusCode(500, new { oResult.StatusMessage })
             };
 
