@@ -1,0 +1,27 @@
+name: km-gestion-seguridad
+
+networks:
+  observability:
+    external: true
+    name: observability-network
+  karma:
+    external: true
+    name: karma-network
+
+services:
+  gs-api:
+    image: km-gs-api:latest
+    container_name: km-gs-api
+    build:
+      context: .
+      dockerfile: GS.Api/Dockerfile
+    ports:
+      - "7001:7001"
+    networks:
+      - observability
+      - karma
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:7001
+      - ConnectionStrings__cnSql=Data Source=192.168.18.36\SQLEXPRESS;Database=KM_GSeguridad;User Id=sa;Password=Kreyshin3012!!11;TrustServerCertificate=True;
+    restart: unless-stopped

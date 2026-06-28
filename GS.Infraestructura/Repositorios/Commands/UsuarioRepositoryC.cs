@@ -20,19 +20,19 @@ namespace GS.Infraestructura.Repositorios.Commands
         private readonly DbConexion _dbConexion = dbConexion;
         private readonly ILogger<UsuarioRepositoryC> _logger = logger;
 
-        public Task<SingleResponse<UsuarioEN>> Actualizar(UsuarioEN usuario)
+        public Task<SingleResponse<UsuariosEN>> Actualizar(UsuariosEN usuario)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<SingleResponse<UsuarioEN>> Crear(UsuarioEN usuario)
+        public async Task<SingleResponse<UsuariosEN>> Crear(UsuariosEN usuario)
         {
             if (usuario == null)
             {
                 throw new ArgumentNullException(nameof(usuario));
             }
 
-            var oResp = new SingleResponse<UsuarioEN>();
+            var oResp = new SingleResponse<UsuariosEN>();
 
             DynamicParameters objParam = Utilitarios.GenerarParametros(new
             {
@@ -49,7 +49,7 @@ namespace GS.Infraestructura.Repositorios.Commands
             try
             {
                 using var connection = _dbConexion.CrearConexion;
-                oResp.Data = await connection.QuerySingleAsync<UsuarioEN>(
+                oResp.Data = await connection.QuerySingleAsync<UsuariosEN>(
                          sql: "Sp_UsuarioC_Crear",
                          commandType: CommandType.StoredProcedure,
                          param: objParam

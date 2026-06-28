@@ -10,8 +10,8 @@ namespace GS.Dominio.Interfaces.Commands
 {
     public interface IUsuarioRepositoryC
     {
-        public Task<SingleResponse<UsuarioEN>> Crear(UsuarioEN usuario);
-        public Task<SingleResponse<UsuarioEN>> Actualizar(UsuarioEN usuario);
+        public Task<SingleResponse<UsuariosEN>> Crear(UsuariosEN usuario);
+        public Task<SingleResponse<UsuariosEN>> Actualizar(UsuariosEN usuario);
         public Task<SingleResponse<int>> Eliminar(int id);
     }
 }

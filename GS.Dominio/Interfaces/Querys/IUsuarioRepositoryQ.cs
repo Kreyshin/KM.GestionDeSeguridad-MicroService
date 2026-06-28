@@ -5,7 +5,7 @@ namespace GS.Dominio.Interfaces.Querys
 {
     public interface IUsuarioRepositoryQ
     {
-        public Task<SingleResponse<UsuarioEN>> BuscarPorID(int id);
-        public Task<ListResponse<UsuarioEN>> Consultar(UsuarioEN oFiltro);
+        public Task<SingleResponse<UsuariosEN>> BuscarPorID(int id);
+        public Task<ListResponse<UsuariosEN>> Consultar(UsuariosEN oFiltro);
     }
 }
