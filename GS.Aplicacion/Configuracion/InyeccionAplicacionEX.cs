@@ -1,4 +1,10 @@
-﻿using GS.Aplicacion.Comunes.AuditoriaHelper;
+﻿using GS.Aplicacion.Acceso.Autenticacion.CasosUso;
+using GS.Aplicacion.Acceso.Autenticacion.Interfaces;
+using GS.Aplicacion.Acceso.Conexiones.Interfaces;
+using GS.Aplicacion.Acceso.Conexiones.Servicios;
+using GS.Aplicacion.Acceso.ObtenerMenu;
+using GS.Aplicacion.Comunes.AuditoriaHelper;
+using GS.Aplicacion.Comunes.Interfaces;
 using GS.Aplicacion.Rol.CasosUso;
 using GS.Aplicacion.Rol.Interfaces;
 using GS.Aplicacion.Rol.Mappers;
@@ -19,11 +25,16 @@ namespace GS.Aplicacion.Configuracion
     {
         services.AddScoped<IAuditoriaHelp, AuditoriaHelp>();
         services.AddSingleton<IJwtService, JwtService>();
-            services.AddScoped<IRolCrudCU, RolCrudCU>();
+        services.AddScoped<IRolCrudCU, RolCrudCU>();
+        services.AddScoped<IObtenerMenuCU, ObtenerMenuCU>();
+            services.AddScoped<IAutenticacionCU, AutenticacionCU>();
+            services.AddScoped<IGestionConexionesSV, GestionConexionesSV>();
 
             services.AddAutoMapper(
-                    typeof(RolCrudProfileAM).Assembly
-                );
+                    typeof(RolCrudProfileAM).Assembly,
+                    typeof(ObtenerMenuAM).Assembly
+                    
+                ); 
             return services;
     }
 }

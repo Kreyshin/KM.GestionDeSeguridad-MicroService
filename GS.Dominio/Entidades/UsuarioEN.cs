@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BCrypt.Net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GS.Dominio.Entidades
 {
-    public class UsuarioEN
+    public class UsuariosEN
     {
         public int ID_Usuario { set; get; }
         public string C_Usuario { set; get; }
@@ -23,5 +24,9 @@ namespace GS.Dominio.Entidades
         public string C_Rol { set; get; }
         public string C_Empleado { set; get; }
         #endregion
+
+
+        public bool VerificarClave(string claveIngresada)
+        => BCrypt.Net.BCrypt.Verify(claveIngresada, C_Clave);
     }
 }
