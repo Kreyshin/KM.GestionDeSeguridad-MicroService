@@ -7,6 +7,7 @@ using GS.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -14,6 +15,19 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 // Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:9001"  // el gateway también debe poder llamarlo
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -21,8 +35,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Configuracion Serilog
-var logsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
-SerilogConfigurator.ConfigureGlobalLogger(logsDirectory);
+//var logsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+//SerilogConfigurator.ConfigureGlobalLogger(logsDirectory);
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.GrafanaLoki(
+    "http://loki:3100",
+    labels: new List<LokiLabel>
+    {
+        new() {Key = "app", Value = "ms-seguridad"},
+        new() {Key = "env", Value = builder.Environment.EnvironmentName.ToLower()}
+    }
+    ).CreateLogger();
+
 builder.Host.UseSerilog(); // Configurar Serilog como proveedor de logging
 
 builder.Services.AddLogging(); // Agregar ILogger al contenedor
@@ -52,10 +79,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
-
+app.UseCors("CorsPolicy");
+//app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
