@@ -14,7 +14,7 @@ services:
     container_name: km-gs-api
     build:
       context: .
-      dockerfile: GS.Api/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "7001:7001"
     networks:
