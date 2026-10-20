@@ -23,10 +23,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:7001
-      - DataAccess__Provider=PostgreSql
-      - SecurityBootstrap__AdminUser=${KARMA_BOOTSTRAP_ADMIN_USER:-}
-      - SecurityBootstrap__AdminPassword=${KARMA_BOOTSTRAP_ADMIN_PASSWORD:-}
-      - SecurityBootstrap__AdminName=${KARMA_BOOTSTRAP_ADMIN_NAME:-Administrador inicial}
+      - DataAccess__Esquema=nuc_core
       - ConnectionStrings__PostgreSql=Host=km-postgres-core;Port=5432;Database=Karma.Systems;Username=karma_admin;Password=${KARMA_POSTGRES_PASSWORD}
-      - ConnectionStrings__cnSql=${KARMA_SQLSERVER_SECURITY:-}
+      - Jwt__Clave=${KARMA_JWT_CLAVE}
+      - Jwt__Emisor=https://localhost:7001/
+      - Jwt__Audiencias__0=https://localhost:9001
+      - Jwt__Minutos=15
     restart: unless-stopped

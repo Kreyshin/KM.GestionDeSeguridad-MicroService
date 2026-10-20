@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "KM.GestionSeguridad.MS",
+    "description": "Microservicio de gestión de seguridad de Karma.\n\nCada carpeta es un módulo del microservicio. Las variables de la colección permiten apuntar al entorno local, a Docker o al gateway sin editar las peticiones.\n\nVariables:\n- baseUrl: raíz del microservicio\n- codSistema: código del sistema contra el que se autentica\n- usuario / clave: credenciales de prueba\n- token: lo guarda el login automáticamente",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:7001", "type": "string" },
+    { "key": "codSistema", "value": "KMWEB0000000001", "type": "string" },
+    { "key": "usuario", "value": "Kreyshin", "type": "string" },
+    { "key": "clave", "value": "", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "description": "Inicio de sesión. Códigos del área AUTH.",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"{{usuario}}\",\n  \"clave\": \"{{clave}}\",\n  \"codSistema\": \"{{codSistema}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/GestionSeguridad/Autenticacion/token",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "v1", "GestionSeguridad", "Autenticacion", "token" ]
+            },
+            "description": "Valida credenciales y devuelve un token de acceso.\n\nRespuestas:\n- 200 AUTH.OK — devuelve token, expiración y datos del usuario\n- 400 AUTH.SOLICITUD_INCOMPLETA — falta usuario, clave o código de sistema\n- 401 AUTH.CREDENCIAL_INVALIDA — usuario o clave incorrectos\n- 401 AUTH.USUARIO_INACTIVO — el usuario está desactivado\n- 401 AUTH.SISTEMA_NO_DISPONIBLE — el código de sistema no existe o está inactivo\n- 401 AUTH.SIN_ACCESO_AL_SISTEMA — el usuario no tiene rol activo en ese sistema\n- 500 SRV.ERROR_INTERNO — fallo no previsto"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cuerpo = pm.response.json();",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', cuerpo.token);",
+                  "    pm.test('Devuelve token', () => pm.expect(cuerpo.token).to.be.a('string').and.not.empty);",
+                  "    pm.test('Devuelve el usuario', () => pm.expect(cuerpo.usuario.idUsuario).to.be.above(0));",
+                  "} else {",
+                  "    pm.test('Devuelve un código AREA.CAUSA', () => pm.expect(cuerpo.codigo).to.match(/^[A-Z]+\\.[A-Z_]+$/));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 — autenticado",
+              "status": "OK",
+              "code": 200,
+              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"expiracion\": \"2026-10-19T12:15:00Z\",\n  \"usuario\": {\n    \"idUsuario\": 1,\n    \"usuario\": \"Kreyshin\",\n    \"nombre\": \"Kreyshin\",\n    \"idRol\": 1,\n    \"idSistema\": 1\n  }\n}"
+            },
+            {
+              "name": "401 — credencial inválida",
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+              "body": "{\n  \"codigo\": \"AUTH.CREDENCIAL_INVALIDA\",\n  \"statusMessage\": \"No autorizado.\"\n}"
+            },
+            {
+              "name": "400 — solicitud incompleta",
+              "status": "Bad Request",
+              "code": 400,
+              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+              "body": "{\n  \"codigo\": \"AUTH.SOLICITUD_INCOMPLETA\",\n  \"statusMessage\": \"Faltan datos obligatorios en la solicitud.\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

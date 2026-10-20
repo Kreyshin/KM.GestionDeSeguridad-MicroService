@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 # Local Docker secrets
 /.env
+
+# Configuracion local con secretos
+appsettings.Development.json
